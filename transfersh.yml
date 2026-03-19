@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transfer-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: transfer-app
+    spec:
+      containers:
+        - name: transfer-container
+          image: dutchcoders/transfer.sh:v1.6.1
+          args: ["--provider=s3"]
+          env:
+            - name: AWS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-transfersh-secret
+                  key: accesskey
+            - name: AWS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-transfersh-secret
+                  key: secretkey
+            - name: BUCKET
+              value: transfersh
+            - name: S3_ENDPOINT
+              value: http://s3-transfersh-service:9000
+            - name: S3_PATH_STYLE
+              value: "true" 
+          ports:
+            - containerPort: 8080
+  selector:
+    matchLabels:
+      app: transfer-app
