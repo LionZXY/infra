@@ -10,3 +10,7 @@ spec:
   clusterIP: None
   selector:
     app: s3-transfersh-app
+  ports:
+    - name: api
+      port: 9000
+      targetPort: 9000
