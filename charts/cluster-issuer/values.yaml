@@ -1,0 +1,5 @@
+issuer:
+  name: letsencrypt
+  email: n@kulikov.uk
+  server: https://acme-v02.api.letsencrypt.org/directory
+  ingressClass: traefik

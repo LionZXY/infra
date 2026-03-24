@@ -1,3 +1,4 @@
+{{- if .Values.bucketJob.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -17,9 +18,9 @@ spec:
           args:
             - |
               set -e
-              mc alias set myminio http://s3-transfersh-service:9000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+              mc alias set myminio http://{{ include "transfersh.fullname" . }}-minio:{{ .Values.minio.service.port }} "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
               mc ready myminio
-              mc mb --ignore-existing myminio/transfersh
+              mc mb --ignore-existing myminio/{{ .Values.transfersh.bucket }}
               mc ls myminio
           env:
             - name: MINIO_ACCESS_KEY
@@ -32,3 +33,4 @@ spec:
                 secretKeyRef:
                   name: {{ include "transfersh.fullname" . }}-minio
                   key: secretkey
+{{- end }}
