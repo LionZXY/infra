@@ -1,0 +1,38 @@
+image:
+  transfersh:
+    repository: dutchcoders/transfer.sh
+    tag: v1.6.1
+    pullPolicy: IfNotPresent
+  minio:
+    repository: minio/minio
+    tag: latest
+    pullPolicy: IfNotPresent
+  mc:
+    repository: minio/mc
+    tag: latest
+    pullPolicy: IfNotPresent
+
+transfersh:
+  replicaCount: 1
+  bucket: transfersh
+  service:
+    port: 8080
+
+minio:
+  replicaCount: 1
+  service:
+    port: 9000
+  persistence:
+    size: 8Gi
+    accessMode: ReadWriteOnce
+  rootUser: minioadmin
+  rootPassword: 2jHG7yqjL8OqSv
+
+ingress:
+  host: transfersh.iu4.dev
+  tls:
+    secretName: transfersh-iu4-dev-tls
+  clusterIssuer: letsencrypt
+
+bucketJob:
+  enabled: true

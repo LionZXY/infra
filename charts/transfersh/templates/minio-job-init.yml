@@ -1,7 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: create-transfersh-bucket
+  name: {{ include "transfersh.fullname" . }}-bucket-init
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   backoffLimit: 6
   template:
@@ -9,7 +12,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: mc
-          image: minio/mc
+          image: "{{ .Values.image.mc.repository }}:{{ .Values.image.mc.tag }}"
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -22,10 +25,10 @@ spec:
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: s3-transfersh-secret
+                  name: {{ include "transfersh.fullname" . }}-minio
                   key: accesskey
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: s3-transfersh-secret
+                  name: {{ include "transfersh.fullname" . }}-minio
                   key: secretkey

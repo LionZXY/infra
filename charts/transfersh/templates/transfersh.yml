@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "transfersh.fullname" . }}
+spec:
+  replicas: {{ .Values.transfersh.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "transfersh.fullname" . }}
+  selector:
+    matchLabels:
+      app: {{ include "transfersh.fullname" . }}
+    spec:
+      containers:
+        - name: transfer-container
+          image: "{{ .Values.image.transfersh.repository }}:{{ .Values.image.transfersh.tag }}"
+          imagePullPolicy: {{ .Values.image.transfersh.pullPolicy }}
+          args: ["--provider=s3"]
+          env:
+            - name: AWS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "transfersh.fullname" . }}-minio
+                  key: accesskey
+            - name: AWS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "transfersh.fullname" . }}-minio
+                  key: secretkey
+            - name: BUCKET
+              value: {{ .Values.transfersh.bucket | quote }}
+            - name: S3_ENDPOINT
+              value: "http://{{ include "transfersh.fullname" . }}-minio:{{ .Values.minio.service.port }}"
+            - name: S3_PATH_STYLE
+              value: "true" 
+          ports:
+            - containerPort: {{ .Values.transfersh.service.port }}
