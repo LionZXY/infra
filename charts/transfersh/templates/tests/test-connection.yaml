@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "transfersh.fullname" . }}-test-connection"
+  labels:
+    app.kubernetes.io/name: {{ include "transfersh.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['sh', '-c']
+      args:
+        - >
+          wget -qO- https://{{ .Values.ingress.host }}/ >/dev/null
+  restartPolicy: Never

@@ -1,0 +1,36 @@
+{{- if .Values.bucketJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "transfersh.fullname" . }}-bucket-init
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mc
+          image: "{{ .Values.image.mc.repository }}:{{ .Values.image.mc.tag }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              mc alias set myminio http://{{ include "transfersh.fullname" . }}-minio:{{ .Values.minio.service.port }} "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+              mc ready myminio
+              mc mb --ignore-existing myminio/{{ .Values.transfersh.bucket }}
+              mc ls myminio
+          env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "transfersh.fullname" . }}-minio
+                  key: accesskey
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "transfersh.fullname" . }}-minio
+                  key: secretkey
+{{- end }}
