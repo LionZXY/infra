@@ -4,13 +4,13 @@ metadata:
   name: {{ include "transfersh.fullname" . }}
 spec:
   replicas: {{ .Values.transfersh.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "transfersh.fullname" . }}
   template:
     metadata:
       labels:
         app: {{ include "transfersh.fullname" . }}
-  selector:
-    matchLabels:
-      app: {{ include "transfersh.fullname" . }}
     spec:
       containers:
         - name: transfer-container
